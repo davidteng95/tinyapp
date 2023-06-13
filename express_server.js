@@ -12,8 +12,15 @@ const urlDatabase = {
 app.use(express.urlencoded({ extended: true }));
 
 app.post("/urls", (req, res) => {
+  const id = generateRandomString();
+  const longURL = req.body.longURL;
+
+  urlDatabase[id] = longURL;
+
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  console.log(urlDatabase); //Log the updated urlDatabase to the console
+  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${id}`);
 });
 
 app.get("/urls", (req, res) => {
