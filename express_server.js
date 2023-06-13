@@ -55,4 +55,14 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-function generateRandomString() {}
+function generateRandomString() {
+  const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let string = '';
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * alphanumeric.length);
+    string += alphanumeric.charAt(randomIndex);
+  }
+
+  return string;
+}
