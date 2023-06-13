@@ -23,6 +23,18 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  // res.redirect(longURL);
+
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("URL not found");
+  }
+
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = {urls: urlDatabase};
   res.render("urls_index", templateVars);
