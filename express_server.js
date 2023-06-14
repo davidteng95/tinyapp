@@ -1,6 +1,13 @@
 const express = require('express');
 const app = express();
+const morgan = require('morgan');
 const PORT = 8080;
+const cookieParser = require('cookie-parser');
+
+
+app.use(cookieParser());
+app.use(morgan('dev'));
+app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
@@ -8,8 +15,6 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-
-app.use(express.urlencoded({ extended: true }));
 
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
@@ -24,12 +29,13 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {urls: urlDatabase};
+  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const username = req.body.username;
+  res.render("urls_new", {username: username});
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -88,7 +94,7 @@ app.get("/hello", (req, res) => {
 });
 
  app.post('/login', (req, res) => {
-  const { username } = req.body;
+  const username = req.body.username;
 
   res.cookie('username', username);
   res.redirect('/urls');
