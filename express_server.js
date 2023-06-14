@@ -61,14 +61,25 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
- });
+// app.get("/set", (req, res) => {
+//   const a = 1;
+//   res.send(`a = ${a}`);
+//  });
  
- app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
- });
+//  app.get("/fetch", (req, res) => {
+//   res.send(`a = ${a}`);
+//  });
+
+ app.post('/urls/:id/', (req, res) => {
+  const shortURL = req.params.id;
+  // console.log(shortURL);
+  const newLongUrl = req.body.newLongURL;
+  // console.log(req.body);
+  // console.log(newLongUrl);
+  urlDatabase[shortURL] = newLongUrl;
+
+  res.redirect('/urls');
+});
 
  app.post('/urls/:id/delete', (req, res) => {
   const urlId = req.params.id;
