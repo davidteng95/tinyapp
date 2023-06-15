@@ -16,6 +16,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  abc: {
+    id: "abc",
+    email: "a@a.com",
+    password: "1234",
+  },
+  def: {
+    id: "def",
+    email: "b@b.com",
+    password: "5678",
+  },
+};
+
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const longURL = req.body.longURL;
@@ -108,6 +121,29 @@ app.get("/register", (req, res) => {
   const username = req.body.username;
 
   res.clearCookie('username', username);
+  res.redirect('/urls');
+});
+
+app.post('/register', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  
+  if (!email || !password) {
+    res.status(400).send("Please provide an email and password")
+  }
+
+  const id = Math.random().toString(36).substring(2, 5);
+
+  const newUser = {
+    id: id,
+    email: req.body.email,
+    password: req.body.password
+  }
+
+  users[id] = newUser;
+
+  console.log(users);
+  res.cookie('email', email);
   res.redirect('/urls');
 });
 
