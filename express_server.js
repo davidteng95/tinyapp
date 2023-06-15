@@ -89,7 +89,7 @@ app.get("/hello", (req, res) => {
 app.get("/register", (req, res) => {
   const user = "";
   const templateVars = {user: user};
-  res.render('register', templateVars);
+  res.render('urls_register', templateVars);
 });
 
 app.get("/login", (req, res) => {
@@ -142,6 +142,7 @@ app.get("/login", (req, res) => {
 
   const email = req.body.email;
   const password = req.body.password;
+  const user_id = req.body.id
 
   if (!email || !password) {
     res.status(400).send('Please provide an email and password');
@@ -157,27 +158,25 @@ app.get("/login", (req, res) => {
   }
 
 
-  // for (const userId in users) {
-  //   const user = users[userId];
-  //   if (user.email === email && user.password === password) {
-  //     res.cookie('user_id', user.id);
-  //     res.redirect('/urls');
-  //     return;
-  //   }
-  // }
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.email === email && user.password === password) {
+      res.cookie('user_id', user.id);
+      res.redirect('/urls');
+      return;
+    }
+  }
 
-
-  // res.status(401).send("Invalid email or password");
-  console.log(user.id);
-  res.cookie('user_id', user.id);
-  res.redirect('/urls');
+  console.log(email);
+  // res.cookie('user_id',);
+  // res.redirect('/urls');
 });
 
  app.post('/logout', (req, res) => {
-  const user = req.body.user;
-
-  res.clearCookie('user_id', user);
-  res.redirect('/urls');
+  const user = req.body;
+  console.log(user);
+  res.clearCookie('user_id', user.id);
+  res.redirect('/login');
 });
 
 app.post('/register', (req, res) => {
