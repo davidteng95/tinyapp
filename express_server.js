@@ -11,9 +11,20 @@ app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "abc",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
@@ -31,7 +42,12 @@ const users = {
 
 
 app.get("/urls", (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const userID = req.cookies.user_id;
+  const user = users[userID];
+  if (!user) {
+    res.status(401).send("Please log in or register first");
+  }
+  
   console.log('user', user);
   const templateVars = {urls: urlDatabase, user: user};
   res.render("urls_index", templateVars);
@@ -49,8 +65,11 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const user = users[req.cookies["user_id"]];
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: user};
+  const userID = req.cookies.user_id;
+  const user = users[userID];
+  const id = req.params.id;
+  const longURL = urlDatabase[id].longURL;
+  const templateVars = { id, longURL, user};
   res.render("urls_show", templateVars);
 });
 
@@ -119,7 +138,10 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const longURL = req.body.longURL;
 
-  urlDatabase[id] = longURL;
+  urlDatabase[id] = {
+    longURL: longURL,
+    userID: user.id
+  };
 
   console.log(req.body); // Log the POST request body to the console
   console.log(urlDatabase); //Log the updated urlDatabase to the console
@@ -128,25 +150,37 @@ app.post("/urls", (req, res) => {
 });
 
  app.post('/urls/:id/', (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const userID = req.cookies.user_id;
+  const user = users[userID];
+  
+
+  
   if (!user) {
-    res.status(401).send("You need to be logged in to create a new URL.");
+    res.status(401).send("You need to be logged in to update a URL.");
     return;
   }
 
   const shortURL = req.params.id;
   // console.log(shortURL);
-  const newLongUrl = req.body.newLongURL;
+  const longURL = req.body.newLongURL;
+
+  const url = {userID, longURL}
   // console.log(req.body);
   // console.log(newLongUrl);
-  urlDatabase[shortURL] = newLongUrl;
+  urlDatabase[shortURL] = url;
 
   res.redirect('/urls');
 });
 
  app.post('/urls/:id/delete', (req, res) => {
-  const urlId = req.params.id;
-  delete urlDatabase[urlId];
+  // const urlId = req.params.id;
+  // delete urlDatabase[urlId];
+  const userID = req.cookies.user_id;
+  const user = users[userID];
+  if (!user) {
+    res.status(401).send("You need to be logged in to delete a URL");
+    return;
+  }
   res.redirect('/urls');
 });
 
@@ -167,7 +201,6 @@ app.post("/urls", (req, res) => {
 
   const email = req.body.email;
   const password = req.body.password;
-  const user_id = req.body.id
 
   if (!email || !password) {
     res.status(400).send('Please provide an email and password');
@@ -177,11 +210,11 @@ app.post("/urls", (req, res) => {
     res.status(403).send(`Invalid email or password`);
     return;
   }
+
   if (user.password !== password){
     res.status(403).send(`Invalid email or password`);
     return;
   }
-
 
   for (const userId in users) {
     const user = users[userId];
