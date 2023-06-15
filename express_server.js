@@ -30,19 +30,6 @@ const users = {
 };
 
 
-
-app.post("/urls", (req, res) => {
-  const id = generateRandomString();
-  const longURL = req.body.longURL;
-
-  urlDatabase[id] = longURL;
-
-  console.log(req.body); // Log the POST request body to the console
-  console.log(urlDatabase); //Log the updated urlDatabase to the console
-  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
-  res.redirect(`/urls/${id}`);
-});
-
 app.get("/urls", (req, res) => {
   const user = users[req.cookies["user_id"]];
   console.log('user', user);
@@ -52,6 +39,11 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["user_id"]];
+  console.log(user);
+  if (!user) {
+    res.redirect('/login');
+    return;
+  }
   const templateVars = {user: user};
   res.render("urls_new", templateVars);
 });
@@ -87,14 +79,22 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const user = "";
+  const user = users[req.cookies["user_id"]];
+  if (user) {
+    res.redirect('/urls');
+    return;
+  }
   const templateVars = {user: user};
   res.render('urls_register', templateVars);
 });
 
 app.get("/login", (req, res) => {
-  // const user = users[req.cookies["user_id"]];
-  const user = req.body.user;
+  const user = users[req.cookies["user_id"]];
+  // const user = req.body.user;
+  if (user) {
+    res.redirect('/urls');
+    return;
+  }
   const templateVars = {user: user};
   res.render('urls_login', templateVars);
 });
@@ -107,6 +107,25 @@ app.get("/login", (req, res) => {
 //  app.get("/fetch", (req, res) => {
 //   res.send(`a = ${a}`);
 //  });
+
+
+app.post("/urls", (req, res) => {
+  const user = users[req.cookies["user_id"]];
+  if (!user) {
+    res.status(401).send("You need to be logged in to create a new URL.");
+    return;
+  }
+
+  const id = generateRandomString();
+  const longURL = req.body.longURL;
+
+  urlDatabase[id] = longURL;
+
+  console.log(req.body); // Log the POST request body to the console
+  console.log(urlDatabase); //Log the updated urlDatabase to the console
+  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${id}`);
+});
 
  app.post('/urls/:id/', (req, res) => {
   const shortURL = req.params.id;
