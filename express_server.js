@@ -87,9 +87,16 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const user = "";
   const templateVars = {user: user};
   res.render('register', templateVars);
+});
+
+app.get("/login", (req, res) => {
+  // const user = users[req.cookies["user_id"]];
+  const user = req.body.user;
+  const templateVars = {user: user};
+  res.render('urls_login', templateVars);
 });
 
 // app.get("/set", (req, res) => {
@@ -119,16 +126,57 @@ app.get("/register", (req, res) => {
 });
 
  app.post('/login', (req, res) => {
-  const username = req.body.username;
+  
+  // // 1. get the email,  from req.body
+  // const {email, password} = req.body
+  
+  // //loop over the entire user data base, check if the email exists, if not give 404 or redirect
+  // for (const user in users) {
+  //   if ()
+  // }
+  // //password matches
 
-  res.cookie('username', username);
+  // //once data matches set the user_id
+  
+  // const user_id = 'abc';
+
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!email || !password) {
+    res.status(400).send('Please provide an email and password');
+  }
+  const user = Object.values(users).find(user => user.email === email || user.password === password);
+  if (!user){
+    res.status(403).send(`Invalid email or password`);
+    return;
+  }
+  if (user.password !== password){
+    res.status(403).send(`Invalid email or password`);
+    return;
+  }
+
+
+  // for (const userId in users) {
+  //   const user = users[userId];
+  //   if (user.email === email && user.password === password) {
+  //     res.cookie('user_id', user.id);
+  //     res.redirect('/urls');
+  //     return;
+  //   }
+  // }
+
+
+  // res.status(401).send("Invalid email or password");
+  console.log(user.id);
+  res.cookie('user_id', user.id);
   res.redirect('/urls');
 });
 
  app.post('/logout', (req, res) => {
-  const username = req.body.username;
+  const user = req.body.user;
 
-  res.clearCookie('username', username);
+  res.clearCookie('user_id', user);
   res.redirect('/urls');
 });
 
@@ -169,8 +217,6 @@ app.post('/register', (req, res) => {
   users[user_id] = newUser;
 
   console.log(users);
-
-  
 
   res.cookie('user_id', user_id);
   res.redirect('/urls');
