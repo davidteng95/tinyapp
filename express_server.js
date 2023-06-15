@@ -128,6 +128,12 @@ app.post("/urls", (req, res) => {
 });
 
  app.post('/urls/:id/', (req, res) => {
+  const user = users[req.cookies["user_id"]];
+  if (!user) {
+    res.status(401).send("You need to be logged in to create a new URL.");
+    return;
+  }
+
   const shortURL = req.params.id;
   // console.log(shortURL);
   const newLongUrl = req.body.newLongURL;
