@@ -135,11 +135,29 @@ app.get("/register", (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  
-  if (!email || !password) {
-    res.status(400).send("Please provide an email and password")
-  }
 
+  if (!email || !password) {
+    res.status(400).send("Please provide an email and password");
+    return;
+  }
+  
+  const findUserByEmail = (existingEmail, users) => {
+    for (const userId in users) {
+      const user = users[userId];
+      if (user.email === existingEmail) {
+        return user;
+      }
+    }
+    return null;
+  }
+  
+  const foundUser = findUserByEmail(email, users)
+  
+  if (foundUser) {
+    res.status(400).send("Email already exists");
+    return;
+  }
+  
   const user_id = Math.random().toString(36).substring(2, 5);
 
   const newUser = {
@@ -151,6 +169,9 @@ app.post('/register', (req, res) => {
   users[user_id] = newUser;
 
   console.log(users);
+
+  
+
   res.cookie('user_id', user_id);
   res.redirect('/urls');
 });
