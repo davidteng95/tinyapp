@@ -16,9 +16,21 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>   
+        <a class="nav-item nav-link" href="/register">Register</a>   
+        <a class="nav-item nav-link" href="/login">Login</a>   
       </div>
     </div>
+
     <% if (user) {%>
+      <div>
+        <p>Logged in as: <b><%= user.email %>!</b></p>
+        <form method="POST" action="/logout">
+          <button type="submit">Logout</button>
+        </form>
+      </div>
+    <%}%>
+    
+    <!-- <% if (user) {%>
       <div>
         <p>Logged in as: <b><%= user.email %>!</b></p>
         <form method="POST" action="/logout">
@@ -32,6 +44,6 @@
           <button type="submit">Login</button>
         </form>
       </div>
-    <% } %>
+    <% } %> -->
   </nav>
 </header>
