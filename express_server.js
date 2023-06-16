@@ -3,7 +3,7 @@ const app = express();
 const morgan = require('morgan');
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
-
+const bcrypt = require("bcryptjs");
 
 app.use(cookieParser());
 app.use(morgan('dev'));
@@ -31,12 +31,12 @@ const users = {
   abc: {
     id: "abc",
     email: "a@a.com",
-    password: "1234",
+    password: bcrypt.hashSync("1234", 10)
   },
   def: {
     id: "def",
     email: "b@b.com",
-    password: "5678",
+    password: bcrypt.hashSync("5678", 10)
   },
 };
 
@@ -276,6 +276,7 @@ app.post("/urls", (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (!email || !password) {
     res.status(400).send("Please provide an email and password");
@@ -292,9 +293,7 @@ app.post('/register', (req, res) => {
     return null;
   }
   
-  const foundUser = findUserByEmail(email, users)
-  
-  if (foundUser) {
+  if (findUserByEmail(email, users)) {
     res.status(400).send("Email already exists");
     return;
   }
@@ -304,7 +303,7 @@ app.post('/register', (req, res) => {
   const newUser = {
     id: user_id,
     email: req.body.email,
-    password: req.body.password
+    password: hashedPassword
   }
 
   users[user_id] = newUser;
