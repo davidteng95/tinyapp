@@ -234,36 +234,44 @@ app.post("/urls", (req, res) => {
   // //once data matches set the user_id
   
   // const user_id = 'abc';
-
+  console.log(req.body);
   const email = req.body.email;
   const password = req.body.password;
+  // const hashedPassword = bcrypt.hashSync(password, 10)
+  
 
   if (!email || !password) {
     res.status(400).send('Please provide an email and password');
+    return;
   }
-  const user = Object.values(users).find(user => user.email === email || user.password === password);
-  if (!user){
+
+  const user = Object.values(users).find(user => user.email === email);
+  
+  // console.log('user', user)
+  // console.log('userpw', user.password);
+  // console.log(!bcrypt.compareSync(password, user.password));
+  if (!user || !bcrypt.compareSync(password, user.password)) {
     res.status(403).send(`Invalid email or password`);
     return;
   }
 
-  if (user.password !== password){
-    res.status(403).send(`Invalid email or password`);
-    return;
-  }
+  // if (user.password !== hashedPassword){
+  //   res.status(403).send(`Invalid email or password`);
+  //   return;
+  // }
 
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email && user.password === password) {
-      res.cookie('user_id', user.id);
-      res.redirect('/urls');
-      return;
-    }
-  }
+  // for (const userId in users) {
+  //   const user = users[userId];
+  //   if (user.email === email && user.password === password) {
+  //     res.cookie('user_id', user.id);
+  //     res.redirect('/urls');
+  //     return;
+  //   }
+  // }
 
   console.log(email);
-  // res.cookie('user_id',);
-  // res.redirect('/urls');
+  res.cookie('user_id', user.id);
+  res.redirect('/urls');
 });
 
  app.post('/logout', (req, res) => {
