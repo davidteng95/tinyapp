@@ -111,7 +111,14 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const userID = req.session.user_id;
+  const user = users[userID];
+  if (user) {
+    res.redirect('/urls');
+    return;
+  }
+  res.redirect('/login');
+  // res.send("Hello!");
 });
 
 app.get("/urls.json", (req, res) => {
