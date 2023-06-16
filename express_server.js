@@ -40,6 +40,15 @@ const users = {
   },
 };
 
+const urlsForUser = (id) => {
+  const userURLs = {};
+  for (const url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      userURLs[url] = urlDatabase[url];
+    }
+  }
+  return userURLs;
+}
 
 app.get("/urls", (req, res) => {
   const userID = req.cookies.user_id;
@@ -47,9 +56,10 @@ app.get("/urls", (req, res) => {
   if (!user) {
     res.status(401).send("Please log in or register first");
   }
-  
+
   console.log('user', user);
-  const templateVars = {urls: urlDatabase, user: user};
+  const userURLs = urlsForUser(userID);
+  const templateVars = {urls: userURLs, user: user};
   res.render("urls_index", templateVars);
 });
 
@@ -67,8 +77,21 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userID = req.cookies.user_id;
   const user = users[userID];
+
+  if (!user) {
+    res.status(401).send("Please log in or register first");
+    return;
+  }
+
   const id = req.params.id;
-  const longURL = urlDatabase[id].longURL;
+  const userURLs = urlsForUser(userID);
+  console.log("userURLs",userURLs);
+  if (!Array.isArray(userURLs) || !userURLs.includes(id)) {
+    res.status(403).send("You do not have permission to access this URL");
+    return;
+  }
+
+  const longURL = urlDatabase[id].userURLs;
   const templateVars = { id, longURL, user};
   res.render("urls_show", templateVars);
 });
@@ -173,14 +196,27 @@ app.post("/urls", (req, res) => {
 });
 
  app.post('/urls/:id/delete', (req, res) => {
-  // const urlId = req.params.id;
-  // delete urlDatabase[urlId];
+  const urlId = req.params.id;
   const userID = req.cookies.user_id;
   const user = users[userID];
   if (!user) {
     res.status(401).send("You need to be logged in to delete a URL");
     return;
   }
+
+  const url = urlDatabase[urlId];
+
+  if (!url) {
+    res.status(404).send("URL not found");
+    return;
+  }
+
+  if (url.userID !== userID) {
+    res.status(403).send("You are not authorized to delete this URL");
+    return;
+  }
+
+  delete urlDatabase[urlId];
   res.redirect('/urls');
 });
 
