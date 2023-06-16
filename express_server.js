@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const PORT = 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const {getUserByEmail} = require('./helpers')
 
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
@@ -305,17 +306,17 @@ app.post('/register', (req, res) => {
     return;
   }
   
-  const findUserByEmail = (existingEmail, users) => {
-    for (const userId in users) {
-      const user = users[userId];
-      if (user.email === existingEmail) {
-        return user;
-      }
-    }
-    return null;
-  }
+  // const getUserByEmail = (existingEmail, users) => {
+  //   for (const userId in users) {
+  //     const user = users[userId];
+  //     if (user.email === existingEmail) {
+  //       return user;
+  //     }
+  //   }
+  //   return null;
+  // }
   
-  if (findUserByEmail(email, users)) {
+  if (getUserByEmail(email, users)) {
     res.status(400).send("Email already exists");
     return;
   }
