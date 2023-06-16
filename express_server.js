@@ -2,12 +2,18 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const PORT = 8080;
-const cookieParser = require('cookie-parser');
-const bcrypt = require("bcryptjs");
+const cookieSession = require('cookie-session');
+const bcrypt = require('bcryptjs');
 
-app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieSession({
+  name: 'session',
+  keys: ['random', 'keys'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 app.set("view engine", "ejs");
 
@@ -19,11 +25,11 @@ app.set("view engine", "ejs");
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "abc",
+    userID: "abc"
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "aJ48lW",
+    userID: "aJ48lW"
   },
 };
 
@@ -51,7 +57,7 @@ const urlsForUser = (id) => {
 }
 
 app.get("/urls", (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   if (!user) {
     res.status(401).send("Please log in or register first");
@@ -64,8 +70,9 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const user = users[req.cookies["user_id"]];
-  console.log(user);
+  const userID = req.session.user_id;
+  const user = users[userID];
+  // console.log(user);
   if (!user) {
     res.redirect('/login');
     return;
@@ -75,7 +82,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
 
   if (!user) {
@@ -84,14 +91,16 @@ app.get("/urls/:id", (req, res) => {
   }
 
   const id = req.params.id;
+  console.log('id', id);
   const userURLs = urlsForUser(userID);
-  console.log("userURLs",userURLs);
-  if (!Array.isArray(userURLs) || !userURLs.includes(id)) {
+  console.log("userURLs", userURLs);
+  if (!Object.keys(userURLs).includes(id)) {
     res.status(403).send("You do not have permission to access this URL");
     return;
   }
 
-  const longURL = urlDatabase[id].userURLs;
+  const longURL = urlDatabase[id].longURL;
+  console.log('longURL', longURL);
   const templateVars = { id, longURL, user};
   res.render("urls_show", templateVars);
 });
@@ -121,7 +130,8 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const userID = req.session.user_id;
+  const user = users[userID];
   if (user) {
     res.redirect('/urls');
     return;
@@ -131,7 +141,8 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const userID = req.session.user_id;
+  const user = users[userID];
   // const user = req.body.user;
   if (user) {
     res.redirect('/urls');
@@ -152,7 +163,8 @@ app.get("/login", (req, res) => {
 
 
 app.post("/urls", (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const userID = req.session.user_id;
+  const user = users[userID];
   if (!user) {
     res.status(401).send("You need to be logged in to create a new URL.");
     return;
@@ -166,14 +178,14 @@ app.post("/urls", (req, res) => {
     userID: user.id
   };
 
-  console.log(req.body); // Log the POST request body to the console
-  console.log(urlDatabase); //Log the updated urlDatabase to the console
+  // console.log(req.body); // Log the POST request body to the console
+  // console.log(urlDatabase); //Log the updated urlDatabase to the console
   // res.send("Ok"); // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${id}`);
 });
 
  app.post('/urls/:id/', (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   
 
@@ -197,8 +209,9 @@ app.post("/urls", (req, res) => {
 
  app.post('/urls/:id/delete', (req, res) => {
   const urlId = req.params.id;
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
+
   if (!user) {
     res.status(401).send("You need to be logged in to delete a URL");
     return;
@@ -234,7 +247,7 @@ app.post("/urls", (req, res) => {
   // //once data matches set the user_id
   
   // const user_id = 'abc';
-  console.log(req.body);
+  // console.log(req.body);
   const email = req.body.email;
   const password = req.body.password;
   // const hashedPassword = bcrypt.hashSync(password, 10)
@@ -269,14 +282,15 @@ app.post("/urls", (req, res) => {
   //   }
   // }
 
-  console.log(email);
-  res.cookie('user_id', user.id);
+  // console.log(email);
+  req.session.user_id = user.id;
   res.redirect('/urls');
 });
 
  app.post('/logout', (req, res) => {
   const user = req.body;
   console.log(user);
+  req.session = null;
   res.clearCookie('user_id', user.id);
   res.redirect('/login');
 });
@@ -318,7 +332,7 @@ app.post('/register', (req, res) => {
 
   console.log(users);
 
-  res.cookie('user_id', user_id);
+  req.session.user_id = user_id;
   res.redirect('/urls');
 });
 
