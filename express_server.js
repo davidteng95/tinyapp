@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const PORT = 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const {getUserByEmail} = require('./helpers')
+const {getUserByEmail} = require('./helpers');
 
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
@@ -55,7 +55,7 @@ const urlsForUser = (id) => {
     }
   }
   return userURLs;
-}
+};
 
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
@@ -85,16 +85,20 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
-
+  const id = req.params.id;
+  // console.log('id', id);
+  const userURLs = urlsForUser(userID);
+  console.log("userURLs", userURLs);
+  if (!userURLs.hasOwnProperty(id)) {
+    res.status(401).send("URL does not exist");
+    return;
+  }
+  
   if (!user) {
     res.status(401).send("Please log in or register first");
     return;
   }
 
-  const id = req.params.id;
-  console.log('id', id);
-  const userURLs = urlsForUser(userID);
-  console.log("userURLs", userURLs);
   if (!Object.keys(userURLs).includes(id)) {
     res.status(403).send("You do not have permission to access this URL");
     return;
@@ -107,7 +111,8 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  console.log(req.params.id);
+  const longURL = urlDatabase[req.params.id].longURL;
   // res.redirect(longURL);
 
   if (longURL) {
@@ -185,7 +190,19 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
- app.post('/urls/:id/', (req, res) => {
+app.post("/urls/new", (req, res) => {
+  const userID = req.session.user_id;
+  const user = users[userID];
+  // console.log(user);
+  if (!user) {
+    res.redirect('/login');
+    return;
+  }
+  // const templateVars = {user: user};
+  // res.render("urls_new", templateVars);
+});
+
+app.post('/urls/:id/', (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
   
@@ -200,7 +217,7 @@ app.post("/urls", (req, res) => {
   // console.log(shortURL);
   const longURL = req.body.newLongURL;
 
-  const url = {userID, longURL}
+  const url = {userID, longURL};
   // console.log(req.body);
   // console.log(newLongUrl);
   urlDatabase[shortURL] = url;
@@ -208,7 +225,7 @@ app.post("/urls", (req, res) => {
   res.redirect('/urls');
 });
 
- app.post('/urls/:id/delete', (req, res) => {
+app.post('/urls/:id/delete', (req, res) => {
   const urlId = req.params.id;
   const userID = req.session.user_id;
   const user = users[userID];
@@ -234,7 +251,7 @@ app.post("/urls", (req, res) => {
   res.redirect('/urls');
 });
 
- app.post('/login', (req, res) => {
+app.post('/login', (req, res) => {
   
   // // 1. get the email,  from req.body
   // const {email, password} = req.body
@@ -288,11 +305,11 @@ app.post("/urls", (req, res) => {
   res.redirect('/urls');
 });
 
- app.post('/logout', (req, res) => {
+app.post('/logout', (req, res) => {
   const user = req.body;
   console.log(user);
   req.session = null;
-  res.clearCookie('user_id', user.id);
+  // res.clearCookie('user_id', user.id);
   res.redirect('/login');
 });
 
@@ -327,7 +344,7 @@ app.post('/register', (req, res) => {
     id: user_id,
     email: req.body.email,
     password: hashedPassword
-  }
+  };
 
   users[user_id] = newUser;
 
@@ -341,7 +358,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-function generateRandomString() {
+const generateRandomString = () => {
   const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let string = '';
 
@@ -351,4 +368,4 @@ function generateRandomString() {
   }
 
   return string;
-}
+};
