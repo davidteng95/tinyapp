@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const PORT = 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const { getUserByEmail, generateRandomString } = require('./helpers');
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
 
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
@@ -37,16 +37,6 @@ const users = {
     email: "b@b.com",
     password: bcrypt.hashSync("5678", 10)
   },
-};
-
-const urlsForUser = (id) => {
-  const userURLs = {};
-  for (const url in urlDatabase) {
-    if (urlDatabase[url].userID === id) {
-      userURLs[url] = urlDatabase[url];
-    }
-  }
-  return userURLs;
 };
 
 app.get("/urls", (req, res) => {

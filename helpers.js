@@ -21,7 +21,20 @@ const generateRandomString = () => {
   return string;
 };
 
+
+const urlsForUser = (id) => {
+  const userURLs = {};
+  for (const url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      userURLs[url] = urlDatabase[url];
+    }
+  }
+  return userURLs;
+};
+
+
 module.exports = {
   getUserByEmail,
-  generateRandomString
+  generateRandomString,
+  urlsForUser
 };
