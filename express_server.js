@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const PORT = 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const { getUserByEmail } = require('./helpers');
+const { getUserByEmail, generateRandomString } = require('./helpers');
 
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
@@ -294,14 +294,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const generateRandomString = () => {
-  const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let string = '';
-
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * alphanumeric.length);
-    string += alphanumeric.charAt(randomIndex);
-  }
-
-  return string;
-};

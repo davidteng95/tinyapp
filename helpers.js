@@ -8,6 +8,20 @@ const getUserByEmail = (existingEmail, users) => {
   return null;
 }
 
+
+const generateRandomString = () => {
+  const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let string = '';
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * alphanumeric.length);
+    string += alphanumeric.charAt(randomIndex);
+  }
+
+  return string;
+};
+
 module.exports = {
-  getUserByEmail
+  getUserByEmail,
+  generateRandomString
 };
