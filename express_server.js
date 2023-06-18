@@ -86,7 +86,6 @@ app.get("/", (req, res) => {
     return;
   }
   res.redirect('/login');
-  // res.send("Hello!");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -120,16 +119,6 @@ app.get("/login", (req, res) => {
   const templateVars = { user: user };
   res.render('urls_login', templateVars);
 });
-
-// app.get("/set", (req, res) => {
-//   const a = 1;
-//   res.send(`a = ${a}`);
-//  });
-
-//  app.get("/fetch", (req, res) => {
-//   res.send(`a = ${a}`);
-//  });
-
 
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
