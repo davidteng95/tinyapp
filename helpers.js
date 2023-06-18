@@ -1,3 +1,5 @@
+const {urlDatabase} = require('./database');
+
 const getUserByEmail = (existingEmail, users) => {
   for (const userId in users) {
     const user = users[userId];
@@ -6,7 +8,7 @@ const getUserByEmail = (existingEmail, users) => {
     }
   }
   return null;
-}
+};
 
 
 const generateRandomString = () => {
