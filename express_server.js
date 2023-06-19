@@ -69,13 +69,17 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id].longURL;
-
-  if (longURL) {
-    res.redirect(longURL);
-  } else {
-    res.status(404).send("URL not found");
+  const id = req.params.id;
+  const url = urlDatabase[id];
+  
+  if (!url || !url.longURL) {
+    res.status(404).send("URL does not exist");
+    return;
   }
+  
+  const longURL = url.longURL;
+  res.redirect(longURL);
+
 });
 
 app.get("/", (req, res) => {
