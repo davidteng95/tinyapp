@@ -156,13 +156,24 @@ app.post("/urls/new", (req, res) => {
 app.post('/urls/:id/', (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
+  const shortURL = req.params.id;
+  const userURLs = urlsForUser(userID);
 
   if (!user) {
     res.status(401).send("You need to be logged in to update a URL.");
     return;
   }
 
-  const shortURL = req.params.id;
+  if (urlDatabase[shortURL] === undefined) {
+    res.status(404).send("URL does not exist");
+    return;
+  }
+
+  if (!Object.keys(userURLs).includes(shortURL)) {
+    res.status(403).send("You do not have permission to access this URL");
+    return;
+  }
+
   const longURL = req.body.newLongURL;
   const url = { userID, longURL };
   urlDatabase[shortURL] = url;
